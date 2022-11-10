@@ -14,8 +14,6 @@ from PIL import Image
 # Define semantic model to use
 # model = SentenceTransformer('all-MiniLM-L6-v2')
 model = SentenceTransformer('paraphrase-albert-small-v2')
-
-
 # model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 
 
@@ -99,7 +97,7 @@ def similarity_table(new_entry, instances_series, instances_links, embeddings):
 
 ## DEMO APP START
 
-image_title = Image.open('C:/Users/marco/PycharmProjects/OpenEdu/Wikimedia-logo.png')
+image_title = Image.open('test_streamlit_openedu/Wikimedia-logo.png')
 st.image(image_title, width=100)
 st.title('Wikimedia - OpenEdu')
 
@@ -151,7 +149,7 @@ with onto_nav:
                              (df_onto.Topic == topic) & (df_onto.Edu_level == edu_level)]['Title']
 
     # Define container for results
-    image_asset = Image.open('C:/Users/marco/PycharmProjects/OpenEdu/Wikimedia_asset_pic.png')
+    image_asset = Image.open('test_streamlit_openedu/Wikimedia_asset_pic.png')
     with col1:
         container_1 = st.container()
         container_1.image(image_asset, width=150)
