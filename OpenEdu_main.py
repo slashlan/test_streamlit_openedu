@@ -9,14 +9,14 @@ import re
 import streamlit as st
 import sqlalchemy as sa
 from sentence_transformers import SentenceTransformer, util
-
-
-
-
+from PIL import Image
 
 # Define semantic model to use
 # model = SentenceTransformer('all-MiniLM-L6-v2')
 model = SentenceTransformer('paraphrase-albert-small-v2')
+
+
+# model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 
 
 ## DEFINE FUNCTIONS
@@ -99,6 +99,8 @@ def similarity_table(new_entry, instances_series, instances_links, embeddings):
 
 ## DEMO APP START
 
+image_title = Image.open('C:/Users/marco/PycharmProjects/OpenEdu/Wikimedia-logo.png')
+st.image(image_title, width=100)
 st.title('Wikimedia - OpenEdu')
 
 # Create a text element and let the reader know the data is loading.
@@ -115,38 +117,82 @@ sentence_list, title_list, link_list, embeddings = preprocess_text(df)
 
 # Load onto data here
 df_onto = pd.DataFrame({
-    'Content_type': ['Wiki project', 'External project', 'Article', 'Wiki project', 'Wiki project'],
-    'Skills': ['Advanced', 'Medium', 'Beginner', 'Medium', 'Medium']})
+    'Content_type': ['Projects', 'Events & Contests', 'Trainings', 'Guides & Tutorials', 'Open Content Resources'],
+    'Topic': ['Social Sciences', 'Chemistry', 'Art & Literature', 'Mathematics', 'Law'],
+    'Edu_level': ['Primary education', 'Secondary education', 'High School', 'University', 'Continuing education'],
+    'Title': ['WikiMini', 'WikiData', 'Wikipedia', 'Wikiversity', 'Evaluating dashboards']})
+
 
 # Create ontology navigation and search bar
-onto_nav, search_bar = st.tabs(["Explore", "Search bar"])
+onto_nav, search_bar = st.tabs(["Explore", "Search"])
 
-# Data loading complete message
-# data_load_state.text('Loading data...done!')
-
+# ONTOLOGY NAVIGATION TAB
 # Ontology navigation by chained filters
+
 with onto_nav:
-    project_type = st.selectbox(
-        'Content type',
-        df_onto['Content_type'].unique())
+    # Define 3 columns layout
+    col1, col2, col3 = st.columns(3)
 
-    skills = st.selectbox(
-        'Skills level',
-        df_onto.loc[df_onto.Content_type == project_type]['Skills'].unique())
+    with col1:
+        project_type = st.selectbox(
+            'Content type',
+            df_onto['Content_type'].unique())
+    with col2:
+        topic = st.selectbox(
+            'Topic',
+            df_onto.loc[df_onto.Content_type == project_type]['Topic'].unique())
+    with col3:
+        edu_level = st.selectbox(
+            'Educational level',
+            df_onto.loc[(df_onto.Content_type == project_type) &
+                        (df_onto.Topic == topic)]['Edu_level'].unique())
+    # Define results
+    nav_result = df_onto.loc[(df_onto.Content_type == project_type) &
+                             (df_onto.Topic == topic) & (df_onto.Edu_level == edu_level)]['Title']
 
+    # Define container for results
+    image_asset = Image.open('C:/Users/marco/PycharmProjects/OpenEdu/Wikimedia_asset_pic.png')
+    with col1:
+        container_1 = st.container()
+        container_1.image(image_asset, width=150)
+        container_1.write(nav_result.iloc[0])
+    with col2:
+        if len(nav_result)>=2:
+            container_2 = st.container()
+            container_2.image(image_asset, width=150)
+            container_2.write(nav_result.iloc[1])
+        else:
+            print('')
+    with col3:
+        if len(nav_result)>=3:
+            container_3 = st.container()
+            container_3.image(image_asset, width=150)
+            container_3.write(nav_result.iloc[2])
+        else:
+            print('')
+
+# SEARCH TAB
 # Build search bar & find button action
 
 with search_bar:
-    value = st.text_input('Search bar', max_chars=512, placeholder='Type..')
-
-    if not value and not st.button('Find'):
+    col4, col5 = st.columns(2)
+    with col4:
+        value = st.text_input('', max_chars=128, placeholder='Type..')
+    with col5:
+        st.write('')
+        st.write('')
+        search_button = st.button('Find')
+    if not value and not search_button:
         print('')
     else:
         # Create similarity vector and top 3 most similar scores
         results_search = similarity_table(value, title_list, link_list, embeddings)
 
         # Print results
-        st.write(results_search)
-
+        for i in range(0, len(results_search)):
+            result_box = st.container()
+            result_box.image(image_asset, width=150)
+            result_box.write(results_search['instance'].iloc[i])
+            result_box.write(results_search['link'].iloc[i])
 # Notify the reader that the data was successfully loaded.
 # data_load_state.text('Loading data...done!')
