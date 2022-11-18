@@ -117,6 +117,7 @@ onto_nav, search_bar = st.tabs(["Explore", "Search"])
 
 # SEARCH TAB
 # Build search bar & find button action
+image_asset = Image.open('/app/test_streamlit_openedu/Wikimedia_asset_pic.png')
 
 with search_bar:
     col4, col5 = st.columns(2)
